@@ -1,0 +1,340 @@
+"""/*************************************************************************
+ *
+ *  Algorithms and Computing Theory
+ *
+ *  Problem: Insertion sort and Quick sort
+ *  Description: Evaluate experimentally the performance of Quick Sort for different methods of choosing the pivot, and compare with Insertion Sort.
+ *
+ *
+     
+       The running time measured in nano sec.
+       ---------------------------------------------------------------
+      |version | Increasing order | Decreasing order |    Random     |
+      ----------------------------------------------------------------
+      | 1      |  28364404        |   1157161427549  |  582353135084 |     
+      ----------------------------------------------------------------
+      | 2a     |  445627917040    |   450706217304   |  453394342279 |
+      ---------------------------------------------------------------
+      | 2b     |  4583016337      |   4594846561     |  4576020877   |
+      ----------------------------------------------------------------
+
+      Answer for question # 4
+      --------------------------------------------------------------
+      |version | Increasing order | Decreasing order |    Random   |
+      --------------------------------------------------------------
+      | 1      |  O(n)            |   O(n^2)         |  O(n^2)     |     
+      --------------------------------------------------------------
+      | 2a     |  O(n^2)          |   O(n^2)         |  O(n^2)     |
+      --------------------------------------------------------------
+      | 2b     | O(nlogn)         |   O(nlogn)       |  O(nlogn)   |
+      --------------------------------------------------------------
+
+
+
+      Row to Row comparison->
+      version1 -> Increasing order
+      The time complexity for an array in an increasing order is O(n).
+      If we look in the code, we see that the while loop that iterates from position 1 till the end of the
+      array. And checks the items in the sorted section(left of the pointer) with the unsorted section
+      (right of the pointer) and no swapping occur because the key to be inserted is greater than every
+      element on its left(sorted sub-list).
+      Hence the time complexity is O(n) which is considered as best case for insertion sort.
+      
+      version1 -> Decreasing order:
+      The time complexity for an array in an Decreasing order is O(n^2).
+      It is opposite of increasing order because the key to be inserted is less than the every element
+      on its left(sorted sub-list) that cuases every element to shift one position to right within the while
+      loop. Hence the time complexity is O(n^2) which is considered as worst case for insertion sort.
+
+      version1 -> Random Order
+      The time complexity for array in an random order is O(n^2). because the array starts with random
+      number and there is a possibility that half of the number less than the pointer element on left side
+      and half of the number greater than the pointer element on right side.
+      So we can consider the time complexity is half of worst case time complexity which is n^2/2.
+      If we ignore constant value 2 the time complexity is O(n^2).
+
+      version 2a -> Quick sort- first pivot
+      Increasing, Decreasing, Random
+      In all 3 cases, the time complexity is O(n^2) because if we select the first element as pivot
+      then we do recursive calls on (n-1) elements which take time c(n-1) where c is constant.
+      then next recursive calls on n-2 elements which take time c(n-2). Repeat this process until
+      we reach to the size of 1. The worst cases occurs if the partition process always picks  the
+      greatest or smallest element as pivot , which will be the case for sorted array as input is either
+      ascending or descending order.
+      Hence time complexity is O(n^2).
+      Recurrence equation is  T(n) = T(0) + T(n-1) + O(n) after solving T(n)=O(n^2)
+
+      version 2b -> Quick sort- median pivot
+      Increasing, Decreasing, Random
+      In these case, the time complexity is O(nlogn) because if we calculate median of 3 random indexes
+      with the array and then caluclate the median of those elements then there are high chances that
+      the calculated median(pivot) will fall in somewhere in the middle of an array. It will divide the
+      array in two sub-arrays. If subarray is even, (n/2) elements on one side and n/2 elements on other side
+      and odd case, (n-1)/2 on each side . This is the best case when the partition process always picks the
+      middle element as pivot. 
+      Recurrence equation is T(n) = 2T(n/2) + O(n) after solving T(n)=O(nlogn) ,
+      Hence time complexity is O(nlogn).
+
+      Column to Column comparison->
+      1) Increasing order- If we observed first column in measured running time,
+      the sort based on lowest running time measured would be version 1, version 2b, version 2a and
+      their time complexities are O(n), O(nlogn), O(n^2).
+      The version 1 takes less time than version 2b, then followed by version 2a based on above table
+      because the input is sorted in ascending order the version 1(insertion sort) makes no-inplace
+      sorting / shifting operations while iterating.
+
+      2) Decreasing order- If we observed second column in measured running time,
+      the sequence of running time measured would be version 2b, version 2a, version 1
+      and their time complexities are O(nlogn), O(n^2), O(n^2). The version 1(insertion sort) takes more
+      time because in insertion sort if the array is sorted in decreasing order
+      then it makes more in-place sorting / shifting operations while iterating.
+
+      3) Random- If we observed third column in measured running time,
+      the sequence of running time measured would be version 2b, version 2a, version 1 and
+      their time complexities are O(nlogn), O(n^2), O(n^2). The version 1 takes more time
+      than version 2a, 2b because in insertion sort the array starts from random element,
+      in this situation the time complexty is half of the worst case running time.
+      The version 2a takes more time than version 2b because the pivot element is the first element
+      of an array and as mentioned in previous question, the time complexity in this situation would be O(n^2). The time complexity in version 2b is nlogn because there are high chances that pivot element would fall in the middle of array.
+
+ *
+ *
+ *************************************************************************/"""
+
+
+
+import random
+import time
+#import sys
+#import resource
+#x=1000000
+#sys.setrecursionlimit(x)
+#resource.setrlimit(resource.RLIMIT_STACK, (2**29,-1))
+
+
+def generate_random(arr,start, stop):
+      ''' This function that calculates the median of 3 random numbers '''
+
+      # Local variables
+      arr_mid=[] 
+      mid_index_dict={}
+      counter = 0
+
+      # Loop that generates 3 random numbers
+      while counter < 3:
+            random_value = random.randint(start, stop)
+            mid=arr[random_value]
+            mid_index=random_value
+            arr_mid.append(mid)
+            mid_index_dict[mid]=mid_index
+            counter +=1
+
+      # Sort the array ascending order
+      arr_mid=sorted(arr_mid)
+
+      # Return the median of the array
+      return mid_index_dict[arr_mid[1]]
+
+
+def quicksort_median(arr, start , stop):
+      ''' This is the function that sort the array
+      when the pivot is median of 3 random numbers. '''
+      
+      # Check start position is less than stop position
+      if(start < stop):
+
+            # call the function to get pivot 
+            pi_index = partition_random_pivot(arr, start , stop)
+
+            # recursively quicksort left subarray
+            quicksort_median(arr , start , pi_index-1)
+
+            # recursively quicksort right subarray
+            quicksort_median(arr, pi_index + 1, stop)
+ 
+
+def partition_first_pivot(arr,low,high):
+      ''' This function will take the first element as pivot '''
+      
+      i = ( low+1 )	 # index of lowest + 1 element 
+      pivot = arr[low]	 # pivot element 
+    
+      # For loop that iterates from low+1 position till the end of array
+      for j in range(low+1 , high+1 ): 
+	
+            # If current element is smaller than the pivot element
+            if arr[j] < pivot: 
+                  if (j != i):
+                        # Swap the element i with j
+                        arr[i],arr[j] = arr[j],arr[i]
+                        
+                  # increment the index  
+                  i = i+1
+	    
+      # swap the index -1 element with lowest element so that we get sorted array
+      arr[i-1],arr[low] = arr[low],arr[i-1]
+      
+      return ( i-1 )      
+
+def partition_random_pivot(arr,low,high):
+      ''' This function will take median of 3 random numbers as a pivot element '''
+      
+      # Call the function to calculate the median
+      pivot = generate_random(arr, low, high) 
+      
+      # Data variables
+      i = low       
+      j = high     
+      pivotElement = arr[pivot] 
+
+      # Iterates the while loop till the j is greater than i
+      while(j>i):
+
+            # Itereates the while loop till i is less than or equal to pivot
+            while (arr[i] <= pivotElement and i < high):
+                  i=i+1
+
+            # Itereates the while loop till j is greater than pivot
+            while (arr[j] > pivotElement and j > low):
+                  j=j-1
+
+            # Condition to check if j is greater than i
+            if(i<j):
+                  arr[i],arr[j] = arr[j],arr[i]
+                  if(i == pivot):
+                        pivot = j
+                  elif(j == pivot):
+                        pivot = i
+
+      # Swap j with pivot element
+      arr[j],arr[pivot] = arr[pivot],arr[j]
+      return j
+      
+
+            
+def quicksort_first_pivot(arr,low,high):
+      # Check start position is less than stop position
+      if(low<high):
+
+            # call the function to get pivot 
+            pi_index = partition_first_pivot(arr,low,high) 
+
+            #apply quicksort on left subarray
+            quicksort_first_pivot(arr, low, pi_index-1) 
+
+            #apply quicksort on right subarray
+            quicksort_first_pivot(arr, pi_index+1,high) 
+            
+def insertionSort(arr):
+      
+    # The for loop that iterates from position 1 till end end of the array
+    # The sorted section is on the left of the pointer
+    # The unsorted section is on the right of the pointer
+    for i in range(1, len(arr)): 
+
+        # Store the copy of the value of the pointer 
+        key = arr[i] 
+        j = i-1
+
+        # Condition to check the items in the sorted section with the unsorted section
+        while j >= 0 and key < arr[j] : 
+                arr[j + 1] = arr[j] 
+                j -= 1
+        arr[j + 1] = key 
+
+# User input to enter the size of an array
+n = int(input("Enter the size of elements(n) = ")) 
+#n =100000
+print('This program will measure the running time of three methods for n = 100000','\n')
+arr=[]
+for i in range(n):
+      random_values = random.randint(-100, 100)
+      arr.append(random_values)
+
+# Three types of inputs
+# Sorted in increasing order
+input1=sorted(arr)
+
+# Sorted in decreasing order
+input2=sorted(arr, reverse= True)
+
+# Random numbers
+input3=(arr)
+      
+
+# Insertion sort for Input type 1: Increasing Order
+print('Measure running time for insertion sort.')
+#Input type 1: Increasing Order
+T1_insertioSort_1 = time.time_ns()
+insertionSort(input1)
+T2_insertioSort_1 = time.time_ns()
+print('Input type 1: Increasing Order. '\
+      'Time taken in nanosecond is: ', T2_insertioSort_1 - T1_insertioSort_1)
+
+#Input type 2: Decreasing Order
+T1_insertioSort_2 = time.time_ns()
+insertionSort(input2)
+T2_insertioSort_2 = time.time_ns()
+print('Input type 2: Decreasing Order. '\
+      'Time taken in nanosecond is: ', T2_insertioSort_2 - T1_insertioSort_2)
+
+#Input type 3: Random Numbers
+T1_insertioSort_3 = time.time_ns()
+insertionSort(input3)
+T2_insertioSort_3 = time.time_ns()
+print('Input type 3: Random Numbers. '\
+      'Time taken in nanosecond is: ', T2_insertioSort_3 - T1_insertioSort_3,"\n")
+
+#print("recursion limit",sys.getrecursionlimit())
+
+# Quick sort when the pivot is the first position of the subarray.
+print('Measure running time when pivot is the first position of the subarray.')
+#Input type 1: Increasing Order
+T1_p1_I1 = time.time_ns()
+quicksort_first_pivot(input1, 0, len(input1) - 1)
+T2_p1_I1= time.time_ns()
+print('Input type 1: Increasing Order. '\
+      'Time taken in nanosecond is: ', T2_p1_I1 - T1_p1_I1)
+
+#Input type 2: Decreasing Order
+T1_p1_I2 = time.time_ns()
+quicksort_first_pivot(input2, 0, len(input2) - 1)
+T2_p1_I2 = time.time_ns()
+print('Input type 2: Decreasing Order. '\
+      'Time taken in nanosecond is: ', T2_p1_I2 - T1_p1_I2)
+
+###Input type 3: Random Numbers
+T1_p1_I3 = time.time_ns()
+quicksort_first_pivot(input3, 0, len(input3) - 1)
+T2_p1_I3= time.time_ns()
+print('Input type 3: Random Numbers. '\
+      'Time taken in nanosecond is: ', T2_p1_I3 - T1_p1_I3,"\n")
+
+
+# Quick sort when the pivot equal to the median
+#of the content of those three indexes.
+
+print('Measure running time when pivot is the median of the three indexes.')
+#Input type 1: Increasing Order
+T1_pm_1 = time.time_ns()
+quicksort_median(input1, 0, len(input1) - 1)
+T2_pm_1 = time.time_ns()
+print('Input type 1: Increasing Order. '\
+      'Time taken in nanosecond is: ', T2_pm_1 - T1_pm_1)
+
+#Input type 2: Decreasing Order
+T1_pm_2 = time.time_ns()
+quicksort_median(input2, 0, len(input2) - 1)
+T2_pm_2 = time.time_ns()
+print('Input type 2: Decreasing Order. '\
+      'Time taken in nanosecond is: ', T2_pm_2 - T1_pm_2)
+
+#Input type 3: Random Number
+T1_pm_3 = time.time_ns()
+quicksort_median(arr, 0, len(input3) - 1)
+T2_pm_3 = time.time_ns()
+print('Input type 3: Random Numbers. '\
+      'Time taken in nanosecond is: ', T2_pm_3 - T1_pm_3,"\n")
+
+
+
