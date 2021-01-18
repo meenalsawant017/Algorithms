@@ -1,0 +1,201 @@
+"""/*************************************************************************
+ *
+ *  Algorithms and Computing Theory
+ *
+ *  Problem: Maximum Subarray Problem
+ *  Description: The Maximum Subarray Problem is the task of finding the contiguous subarray,
+ *               within an array of numbers, that has the largest sum.
+ *
+ *  Input: number of vector(n) = 1000
+ *  Output: 
+ *  This problem is to compute the sum of the maximum subarray using 3 different algorithms and measure the running time.
+ *     
+ *
+ *   Tested the algorithms with different values of n and filled the following table with the running times measured in nanoseconds.
+-----------------------------------------------------------------------------------
+	                 | n=10^3   | n=5*10^3 |   n=10^4  |   n=5*10^4  |   n=10^5     |
+-----------------------------------------------------------------------------------
+Brute force        | 40901500 | 948619700| 3960069700| 105942382400| 438914334000 |
+----------------------------------------------------------------------------------
+Divide & conquer   | 2994300  | 15950100 |  22922900 | 181513100   | 238908100    |
+----------------------------------------------------------------------------------
+Kadane             |   0      | 0        | 946800    |  4968000    |  9956000     |
+----------------------------------------------------------------------------------
+
+Draw the conclusions about the running times obtained in the analysis. Do they match or not?
+      Based on the running times observed for Brute force algorithm for which time complexity is O(n^2),
+      we observed that the running time matches. 
+      For instance, If we consider the number of array size is 1000,
+      then the number of operations based on O(n^2) would be 1000000.
+      The total time taken to perform this operation is 40901500 in nanosecond.
+      We calculated the time taken to perform a single operation (40901500/1000000) is 40.9015 . 
+      Then we performed the same process for different values of n
+      and observed the time taken for single operation.
+      We see that the range is around 40 nano sec for different values of n.  
+      Hence, we can say that the measured running times matches with the time complexity of this algorithm.
+      (below table for reference.)
+--------------------------------------------------------------------------------------
+Brute force        |   n=10^3 |   n=5*10^3   |   n=10^4    |   n=5*10^4  |   n=10^5  |
+--------------------------------------------------------------------------------------
+No of Operations   | 1000000  | 25000000     | 100000000   |  2500000    |10000000000|
+--------------------------------------------------------------------------------------
+Time per operation | 40.9015  | 37.944788    | 39.600697   | 42.37695296 | 43.8914334|
+--------------------------------------------------------------------------------------
+
+We followed the same process for Divide and conquer algorithm for which the time complexity O(nlogn) with
+different values of n and observed the time taken for single operation.
+We see that the Time per operation vary for different values of n (shown in the below table).
+Hence, we can say that the measured running time does not match with the time complexity of this algorithm.
+This might be due to overhead involved in this algorithm due to recursive calls involving stack variables and
+stack un-rolling.
+------------------------------------------------------------------------------------------
+Divide and conquer |    n=10^3   |   n=5*10^3   |   n=10^4    |  n=5*10^4  |   n=10^5    |
+------------------------------------------------------------------------------------------
+No of Operations   | 9965.784285 | 61438.5619   | 132877.1238 | 780482.023 | 1660964.047 |
+------------------------------------------------------------------------------------------
+Time per operation | 300.4580387 | 259.6105688  | 172.5120122 | 232.565382 | 143.8370086 |
+------------------------------------------------------------------------------------------
+
+We followed the same process for Kadane algorithm for which the time complexity O(n) with
+for different values of n and observed the time taken for single operation.
+We see that the time per operation is in the range of 90 nano sec for different values of n (shown in the below table).
+Hence, we can say that measured running time matches with the time complexity of this algorithm.
+----------------------------------------------------------------------
+Kadane             |  n=10^3 | n=5*10^3| n=10^4 | n=5*10^4 | n=10^5  |
+----------------------------------------------------------------------
+No of Operations   | 1000    |  5000   | 10000  |   50000  |  100000 |
+----------------------------------------------------------------------
+Time per operation |   0     |  0      | 94.68  |   99.36  |  99.56  |
+----------------------------------------------------------------------
+
+ *
+ *
+ *************************************************************************/"""
+
+import random
+import time
+from random import randint
+
+def Brute_force(arr):
+      '''Using Brute-Force Algorithm to solve Maximum subarray problem.'''
+      
+      maximum = 0
+      Total_Sum = 0
+
+      #For loop that iterates over length of array
+      #to calculate the maximum sum of every possible subarray .
+      for i in range(0,len(arr)):
+            Total_Sum = 0
+
+            # Loop that itereates till the length of array to find largest sum
+            for j in range(i,len(arr)):
+                  Total_Sum = Total_Sum + arr[j]
+                  
+                  # Check the Total_Sum is greater than previous maximum sum
+                  if(Total_Sum > maximum):
+
+                        # Assign the value to return the maximum sum of array
+                        maximum = Total_Sum
+      return maximum
+
+
+def MAX_SUBARRAY(arr,low,high):
+      '''Using Divide and Conquer Algorithm to solve Maximum subarray problem.'''
+
+      # Base case
+      if (high == low):
+            return arr[low]
+      else:
+            # Find the mid point, leftsum, rightsum, crosssum
+            mid = int((low+high)/2)
+            leftSum = MAX_SUBARRAY(arr,low,mid)
+            rightSum = MAX_SUBARRAY(arr,mid+1,high)
+            crossSum = MAX_CROSSING_SUBARRAY(arr,low,mid,high)
+
+            # Returns the maximum subarray sum
+            return max(leftSum, rightSum, crossSum)
+      
+def MAX_CROSSING_SUBARRAY(arr,low,mid,high):
+      '''This is the function to called by MAX_SUBARRAY function
+         to calculate and return the sum of left and right of the mid.'''
+      
+      leftSum = 0
+      Total_Sum = 0
+
+      # Calculate the sum from mid point to left of mid
+      for i in range(mid,low-1,-1):
+            Total_Sum = Total_Sum + arr[i]
+            if (Total_Sum > leftSum):
+                  leftSum = Total_Sum
+                  
+      rightSum = 0
+      Total_Sum = 0
+
+      # Calculate the sum from mid point to right of the mid
+      for j in range(mid+1, high+1):
+            Total_Sum = Total_Sum + arr[j]
+            if (Total_Sum > rightSum):
+                  rightSum = Total_Sum
+
+      # Returns the sum of left and right side of the mid            
+      return leftSum + rightSum
+
+def Kadane_Algo(arr):
+      '''Using Kadane Algorithm to solve Maximum subarray problem.'''
+
+      maxSum = 0
+      currentSum = 0
+
+      # Loop that iterates over length of array to calculate the maximum sum.
+      for i in range(len(arr)):
+            maxSum = arr[i]+ maxSum
+
+            # Check calculated maximum sum is greater than previous one
+            if (maxSum >  currentSum):
+
+                  # Assign the maximum sum
+                  currentSum = maxSum
+                  
+            # If maxSum is negative then reset it to zero.       
+            if(maxSum < 0):
+                  maxSum = 0
+                  
+      return currentSum
+      
+# User input to enter the size of an array
+n = int(input("number of vector(n) = "))
+
+arr=[]
+
+# Loop that itereates over number of array to generate the random values
+# and append the random values in an array in the range of -100 to 100.
+for i in range(n):
+      random_values = random.randint(-100, 100)
+      arr.append(random_values)
+      
+print('\nThis problem is to compute the sum of the maximum subarray'
+      ' using 3 different algorithms and measure the running time.\n')
+
+
+# Call Brute-Force Algorithm and measure the running time.
+T1_bruteForce = time.time_ns()
+result1 = Brute_force(arr)
+T2_bruteForce = time.time_ns()
+print('Using Brute-Force Algorithm the largest sum is: ', result1)
+print('Time taken in nanosecond is: ', T2_bruteForce - T1_bruteForce,"\n")
+
+# Call Divide and Conque Algorithm and measure the running time.
+T1_DivideConquer = time.time_ns()
+result2 = MAX_SUBARRAY(arr, 0, len(arr)-1)
+T2_DivideConquer = time.time_ns()
+print('Using Divide and Conquer Algorithm the largest sum is: ', result2)
+print('Time taken in nanosecond is: ', T2_DivideConquer - T1_DivideConquer, "\n")
+      
+# Call Kadane Algorithm and measure the running time.
+T1_kadane = time.time_ns()
+result3 = Kadane_Algo(arr)
+T2_kadane = time.time_ns()
+print('Using Kadane Algorithm the largest sum is: ', result3)
+print('Time taken in nanosecond is:', T2_kadane - T1_kadane, "\n")
+
+print('------------------------------------------------------------------')
