@@ -1,0 +1,272 @@
+"""/*************************************************************************
+ *
+ *  Algorithms and Computing Theory
+ *
+ *  Problem: Quick sort and Bucket Sort
+ *  Description: Implement a method QuickSort() and BucketSort() that sorts the points in uniform distribution.
+ *
+ *  
+       The running time measured in nano sec.
+       ---------------------------------------------------------------------------------
+      | n               | 1000     | 5000     | 10000     |   50000     |   100000     |
+      ----------------------------------------------------------------------------------
+      | Quick Sort      | 12346440 | 59980395 | 123565286 |  693158845  | 1463284570   |
+      ----------------------------------------------------------------------------------
+      | Bucket Sort     | 3090584  | 54332382 |	248845302 | 17025489435 | 135752955423 |
+      ----------------------------------------------------------------------------------
+
+      Answer for question # 4
+
+      Quick sort--->
+      Question --> According to your measurements, what is the running time
+      of each sorting algorithm? Do they match the expected running time?
+      Answer > The measured running time for quick sort is O(nlogn) and the expected running time is nlogn
+      that matches with this algorithm(quick sort) because
+      if sort the elements using quick sort using median pivot then there are high chances that
+      the calculated median(pivot) will fall in somewhere in the middle of an array. It will divide the
+      array in two sub-arrays. If subarray is even, (n/2) elements on one side and n/2 elements on other side
+      and odd case, (n-1)/2 on each side . This is the best case when the partition process always picks the
+      middle element as pivot. 
+      Recurrence equation is T(n) = 2T(n/2) + O(n) after solving T(n)=O(nlogn) ,
+      Hence time complexity is O(nlogn).
+      
+      Based on the running times observed for Quick Sort, the time complexity is O(nlogn),
+      For instance, If we consider the number of array size is 100000.
+      then the number of operations based on O(nlogn) would be 1660964.047.
+      The total time taken to perform this operation is 1463284570 in nanosecond.
+      We calculated the time taken to perform a single operation (1463284570/1660964.047) is 880.9850955. 
+      Then we performed the same process for others and observed the time taken for single operation.
+      We see that the range is around 800 to 900 nano sec for Quick sort.  
+      Hence, we can say that the measured running times matches with the time complexity of this algorithm.
+      (below table for reference.)
+      --------------------------------------------------------------------------------------------
+      |    n               |  1000       |  5000       |    10000    |   50000     | 100000      |
+      --------------------------------------------------------------------------------------------
+      | Quick Sort         | 12346440    | 59980395    | 123565286   | 693158845   | 1463284570  |
+      --------------------------------------------------------------------------------------------
+      | No of operations   | 9965.784285 | 61438.5619  | 132877.1238 | 780482.0237 | 1660964.047 |
+      --------------------------------------------------------------------------------------------
+      | Time per operation |1238.882927  | 976.2662593 | 929.9214377 | 888.1163485 | 880.9850955 |
+      --------------------------------------------------------------------------------------------
+
+     Bucket Sort-->
+     Question -> According to your measurements, what is the running time
+      of each sorting algorithm? Do they match the expected running time?
+      
+      Answer > The measured running time for bucket sort is O(n^2) and the expected running time is O(n) and
+      does not match for this algorithm.
+      The possible reason could be it is an not an in-place sorting alogrithm
+      and requires extra storage place to be allocated for buckets and list for each bucket ,
+      which after sorting using insertion sort is then remerged or create a new list which is sorted.
+      Hence it has lot of overhead in terms of new memeory allocation and remerging the sorted results. 
+     
+      We repeated this process for bucket sort to verify the measured running time with the time complexities.
+
+      Below table for time for single operation
+      --------------------------------------------------------------------------------------------
+      |    n               |  1000     | 5000	     |    10000	   |  50000	 |   100000      |
+      --------------------------------------------------------------------------------------------
+      | Bucket Sort        | 3090584   | 54332382    | 248845302   | 17025489435 | 135752955423  |
+      --------------------------------------------------------------------------------------------
+      | No of Operations   | 1000000   | 25000000    | 100000000   | 2500000000  | 10000000000   |
+      --------------------------------------------------------------------------------------------
+      | Time per operation |3.090584   | 2.17329528  | 2.48845302  | 6.810195774 |  13.57529554  |
+      --------------------------------------------------------------------------------------------
+    
+ *
+ *
+ *************************************************************************/"""
+
+import math
+from math import pi,cos,sin,tan,atan
+import random
+from math import sqrt
+import random
+import time
+#import sys
+#import resource
+#x=1000000
+#sys.setrecursionlimit(x)
+#resource.setrlimit(resource.RLIMIT_STACK, (2**29,-1))
+
+def generate_uniform_point():
+      ''' This function that generates uniform point in a unit circle. '''
+
+      t = 2*pi*random.uniform(0,1)  
+
+      u = ( random.uniform(0,1) ) + (random.uniform(0,1) ) 
+      if u > 1 :
+            r = 2-u
+      else:
+            r = u
+            
+      (x,y) = (r*cos(t), r*sin(t))
+      return (x,y)     
+
+def cal_distance(cord_x,cord_y):
+      ''' This function that calculates distance from the origin. '''
+      
+      di = sqrt(((cord_x)*(cord_x)) + ((cord_y)*(cord_y)))
+      return  di
+
+
+def generate_random(arr,start, stop):
+      ''' This function that calculates the median of 3 random numbers '''
+
+      # Local variables
+      arr_mid=[] 
+      mid_index_dict={}
+      counter = 0
+
+      # Loop that generates 3 random numbers
+      while counter < 3:
+            random_value = random.randint(start, stop)
+            mid=arr[random_value]
+            mid_index=random_value
+            arr_mid.append(mid)
+            mid_index_dict[mid]=mid_index
+            counter +=1
+
+      # Sort the array ascending order
+      arr_mid=sorted(arr_mid)
+
+      # Return the median of the array
+      return mid_index_dict[arr_mid[1]]
+
+
+def quicksort_median(arr, start , stop):
+      ''' This is the function that sort the array
+      when the pivot is median of 3 random numbers. '''
+      
+      # Check start position is less than stop position
+      if(start < stop):
+
+            # call the function to get pivot 
+            pi_index = partition_random_pivot(arr, start , stop)
+
+            # recursively quicksort left subarray
+            quicksort_median(arr , start , pi_index-1)
+
+            # recursively quicksort right subarray
+            quicksort_median(arr, pi_index + 1, stop)
+ 
+
+def partition_random_pivot(arr,low,high):
+      ''' This function will take median of 3 random numbers as a pivot element '''
+      
+      # Call the function to calculate the median
+      pivot = generate_random(arr, low, high) 
+      
+      # Data variables
+      i = low       
+      j = high     
+      pivotElement = arr[pivot][2]
+
+      # Iterates the while loop till the j is greater than i
+      while(j>i):
+
+            # Itereates the while loop till i is less than or equal to pivot
+            while (arr[i][2] <= pivotElement and i < high):
+                  i=i+1
+
+            # Itereates the while loop till j is greater than pivot
+            while (arr[j][2] > pivotElement and j > low):
+                  j=j-1
+
+            # Condition to check if j is greater than i
+            if(i<j):
+                  arr[i],arr[j] = arr[j],arr[i]
+                  if(i == pivot):
+                        pivot = j
+                  elif(j == pivot):
+                        pivot = i
+
+      # Swap j with pivot element
+      arr[j],arr[pivot] = arr[pivot],arr[j]
+      return j
+      
+def insertionSort(arr):
+      ''' This is the function that sort the array
+      using Insertion Sort algorithm. '''
+      # The for loop that iterates from position 1 till end end of the array
+      # The sorted section is on the left of the pointer
+      # The unsorted section is on the right of the pointer
+      for i in range(1, len(arr)):
+            # Store the copy of the value of the pointer
+            key = arr[i][2]
+            keytuple = arr[i]
+            j = i-1
+
+            # Condition to check the items in the sorted section with the unsorted section
+            while (j >= 0 and key < arr[j][2]):
+                  arr[j + 1] = arr[j]
+                  j -= 1
+            arr[j + 1] = keytuple
+        
+def bucketSort(arr , bucketsize):
+      ''' This is the function that sort the array
+      using Bucket Sort algorithm. '''
+
+      # Create bucket array
+      buckets = []
+      for i in range(bucketsize):
+            buckets.append([])
+            
+      # Assign the elements in bucket array as per the bucket index 
+      for j in arr: 
+            idx_b = int((bucketsize * j[2]))
+            buckets[idx_b].append(j)
+
+      # Call insertion sort to sort the buckets
+      for i in range(bucketsize):
+            insertionSort(buckets[i])   
+          
+      # concatenate the result
+      result = []
+      for i in range(bucketsize):
+            result = result + buckets[i]
+            
+      return result
+
+# User input to enter the size of an array
+n = int(input("Enter the size of elements(n) = "))
+
+# Generate distance
+input1 =[]  
+input2 =[]
+for i in range(n):
+      cordinates = generate_uniform_point()
+      cord_x = cordinates[0]
+      cord_y = cordinates[1]
+      point =(cord_x,cord_y,i)
+      distance = cal_distance(cord_x,cord_y)
+
+      # Create a tuple with x, y co-ordinates and their distance from origin
+      input1.append((cord_x, cord_y, distance))
+      input2.append((cord_x, cord_y, distance))
+
+# Assign the size of the bucket is 75% of the length of the array
+# to keep the load factor of 0.75
+bucket_size = 0.75*len(input2)
+
+print('Measure running time for given program.''\n')
+
+# Measure the running time for Quick Sort
+Input1_Start = time.time_ns()
+quicksort_median(input1, 0, len(input1) - 1)
+Input1_End = time.time_ns()
+print('Quick Sort: Time taken in nanosecond is: ', Input1_End - Input1_Start)
+
+# Measure the running time for Bucket Sort
+Input2_Start = time.time_ns()
+sorted_bucket = bucketSort(input2, int(bucket_size))
+Input2_End = time.time_ns()
+print('Bucket Sort: Time taken in nanosecond is: ', Input2_End - Input2_Start)
+
+# Validation to check whether the sorted array with both algorithms quick sort and bucket sort
+for i in range(len(input1)):
+      if(input1[i][2] != sorted_bucket[i][2]):
+            print('Result mismatch!!!', ' Record ', input1[i])
+            break
+
+
